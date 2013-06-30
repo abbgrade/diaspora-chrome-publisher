@@ -5,7 +5,7 @@
     "manifest_version": 2,
     "default_locale": "en",
     "background": {
-      "scripts": ["js/jquery.min.js", "js/background.js"]
+      "scripts": ["js/jquery.min.js", "background.js"]
     },
     "web_accessible_resources": [
       "icon.png"
@@ -17,14 +17,6 @@
     ],
     "browser_action": {
       "default_title": "__MSG_extAction__*",
-      "default_icon": "icon.png",
-      "default_popup": "share.html"
-    },
-    "content_scripts": [
-      {
-        "matches": ["*://*/*"],
-        "css": ["css/smoothness/jquery-ui-1.8.16.custom.css", "css/thumbs.css"],
-        "js": ["js/jquery.min.js", "js/jquery-ui-1.8.16.custom.min.js"]
-      }
-    ]
+      "default_icon": "icon.png"
+    }
 }
