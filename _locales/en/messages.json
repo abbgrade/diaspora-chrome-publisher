@@ -67,6 +67,10 @@
     "message": "Markdown",
     "description": "Label: Use Markdown to publish contents."
   },
+  "addContent": {
+    "message": "Content",
+    "description": "Label: Edit the content of the post."
+  },
   "addComment": {
     "message": "Comment",
     "description": "Label: Add a comment to the post."
@@ -158,5 +162,17 @@
   "extProjectAbout": {
     "message": "This is free software, take part on the developement at ",
     "description": "Text: Description and link to the Github Project"
+  },
+  "postContinue": {
+    "message": "Continue",
+    "description": "Action: Continue posting task."
+  },
+  "postCancel": {
+    "message": "Cancel",
+    "description": "Action: Cancel posting."
+  },
+  "postSend": {
+    "message": "Send",
+    "description": "Action: Send posting."
   }
 }

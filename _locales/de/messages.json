@@ -4,7 +4,7 @@
     "description": "Text: Extension description."
   },
   "extAction": {
-    "message": "Veröffentliche diese Seite auf Diaspora",
+    "message": "Teile auf Diaspora",
     "description": "Hover: Extension action when hover icon."
   },
   "localStorage": {
@@ -66,6 +66,10 @@
   "addMarkdownOpt": {
     "message": "Markdown",
     "description": "Label: Use Markdown to publish contents."
+  },
+  "addContent": {
+    "message": "Inhalt",
+    "description": "Label: Edit the content of the post."
   },
   "addComment": {
     "message": "Kommentar",
@@ -162,5 +166,17 @@
   "extProjectAbout": {
     "message": "Dies ist Freie Software, nimm an der Entwicklung teil im ",
     "description": "Text: Description and link to the Github Project"
+  },
+  "postContinue": {
+    "message": "Weiter",
+    "description": "Action: Continue posting task."
+  },
+  "postCancel": {
+    "message": "Abbrechen",
+    "description": "Action: Cancel posting."
+  },
+  "postSend": {
+    "message": "Senden",
+    "description": "Action: Send posting."
   }
 }
