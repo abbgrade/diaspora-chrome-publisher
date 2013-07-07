@@ -1,3 +1,4 @@
+console.log("run share.js");
 
 function localize() {
   $("h3[id='extAction']").html(chrome.i18n.getMessage("extAction"));
@@ -117,7 +118,12 @@ function main() {
   });
 
   // parse content
-  chrome.tabs.executeScript(null, {file: "js/content_script.js"});
+  var prefix = "chrome-extension://";
+  if (window.document.URL.substring(0, prefix.length) === prefix) {
+    // internal pages deliver data by themselves!
+  } else {
+    chrome.tabs.executeScript(null, {file: "js/content_script.js"});
+  }
 }
 
 function addContentItem(inner) {
