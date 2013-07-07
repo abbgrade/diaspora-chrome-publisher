@@ -17,6 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+console.log("run background.js");
+
 var podUrl;
 var minutes = getMinutes();
 var t;
@@ -85,3 +87,51 @@ function getMinutes(){
 function getOpt(opt){
   return (window.localStorage != null && window.localStorage.getItem(opt) != null) ? window.localStorage.getItem(opt) : "true";
 }
+
+/**
+ * Create a context menu which will only show up for images.
+ */
+chrome.contextMenus.create({
+  "title" : chrome.i18n.getMessage("extAction"),
+  "type" : "normal",
+  "contexts" : ["image"],
+  "onclick" : function(info, tab) {
+    console.log("image context clicked.");
+
+    chrome.windows.create({
+        url: chrome.extension.getURL('share.html'),
+        type: 'popup',
+        width: 560, height: 420
+      },
+      function(window) {
+        console.log("share.html opened");
+
+        var port = chrome.extension.connect();
+
+        var pageTitle = tab.title;
+        var pageUrl = info.pageUrl;
+        var imagesJson = new Array(0);
+        var videosJson = new Array(0);
+
+        // add data
+        imagesJson.push({
+          pageSrc: pageUrl,
+          imgSrc: info.srcUrl,
+          width: 100,
+          height: 100,
+          title: pageTitle
+        });
+
+        // send data
+        console.log("send getPageDataResponse");
+        port.postMessage({
+          type : "getPageDataResponse",
+          title: pageTitle,
+          url: pageUrl, 
+          images: imagesJson,
+          videos: videosJson
+        });
+        alert(chrome.extension.lastError);
+    });
+  }
+});
