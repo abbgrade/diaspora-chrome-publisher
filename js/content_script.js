@@ -17,10 +17,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-console.log("parse page");
+console.log("run content_script.js");
 
-
+// why this? .. may be removed in future
 var image = null;
+
 var port = chrome.extension.connect();
 
 port.onMessage.addListener(function(msg) {
@@ -35,10 +36,9 @@ port.onMessage.addListener(function(msg) {
       max = Math.max(images[i].width, images[i].height);
       
       if (min/max > 0.3 && max >= 100 && min >= 100) {
-        var imgSrc = images[i].src;
         imagesJson.push({
           pageSrc: window.location.href,
-          imgSrc: decodeURIComponent(encodeURIComponent(imgSrc)),
+          imgSrc: decodeURIComponent(encodeURIComponent(images[i].src)),
           width: images[i].width,
           height: images[i].height,
           title: document.title
@@ -48,7 +48,7 @@ port.onMessage.addListener(function(msg) {
     }
 
     // get videos
-    var videos = document.getElementsByTagName("link");    
+    var videos = document.getElementsByTagName("link");
     var videosJson = new Array(0);
     if (isYoutube(window.location.hostname)) {
       var preview = getYTimg(window.location.href);
