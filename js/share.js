@@ -46,7 +46,22 @@ function getPostSrc() {
     } else {
       // without title
     }
+  } else if (item.hasClass("quote")) {
+    // with quote
+    var text = item.find("blockquote").first().html();
+    var pageSrc = item.attr('data-page-src');
+    var title = item.attr('data-page-title');
+
+    src = src + "\n\n" + "> " + text;
+
+    if((item.find("input[name='showTitle']").prop('checked')) && (title.length > 0)) {
+      // with title
+      src = src + "\n\n" + "[ **"+title+"** ]("+pageSrc+")"
+    } else {
+      // without title
+    }
   } else {
+    console.log("invalid content to share");
     // without image or video
   }
   src = src + "\n\n" + message;
@@ -144,6 +159,16 @@ function addContentItem(inner) {
   console.log("add item " + index);
 }
 
+/*
+  @params:
+    image = {
+      pageSrc: source url
+      imgSrc: image url,
+      width: image width in pixels,
+      height: image height in pixels,
+      title: something like the title
+    }
+*/
 function addContentImage(image) {
   console.log("add image " + image.src);
   var inner = $("#contentImageTemplate").clone();
@@ -173,6 +198,14 @@ function addContentImage(image) {
   } else console.log("duplicate image");
 }
 
+/*
+  @params:
+    video = {
+      pageSrc: source url
+      imgSrc: preview image url,
+      title: cheese cake ingidients
+    }
+*/
 function addContentVideo(video) {
   console.log("add video " + video.url);
   var inner = $("#contentVideoTemplate").clone();
@@ -194,6 +227,35 @@ function addContentVideo(video) {
   if($("#contentCarousel").find("img[src='"+video.imgSrc+"']").length == 0) {
     addContentItem(inner);
   } else console.log("duplicate video");
+}
+
+
+/*
+  @params:
+    quote = {
+      pageSrc: source page url,
+      pageTitle: source page title,
+      text: text of the quote
+    }
+*/
+function addContentQuote(quote) {
+  var inner = $("#contentQuoteTemplate").clone();
+  inner.removeAttr("id");
+  inner.removeClass("hide");
+
+  // fill inner
+  inner.find("blockquote").first().html(quote.text);
+
+  inner.attr("data-page-src", quote.pageSrc);
+  inner.attr("data-page-title", quote.pageTitle);
+
+  if (quote.pageTitle.length > 0)
+    inner.append("<h5><label class='checkbox'><input name='showTitle' type='checkbox'>" + quote.pageTitle + "<label></h5>")
+    inner.find("input[name='showTitle']").prop('checked', getOpt("title") == "true");
+
+  console.log("add quote: " + quote.text);
+  addContentItem(inner);
+
 }
 
 function addContentInfo(text) {
@@ -244,14 +306,18 @@ chrome.extension.onConnect.addListener(function(port) {
     } else if (msg.type == "getPageDataResponse") {
       console.log("received getPageDataResponse");
 
-      if((msg.images.length + msg.videos.length) > 0) {
+      if((msg.images.length + msg.videos.length + msg.quotes.length) > 0) {
         console.log(msg.images.length + " images");
         console.log(msg.videos.length + " videos");
+        console.log(msg.quotes.length + " quotes");
         $.each(msg.videos, function() {
           addContentVideo(this);
         });
         $.each(msg.images, function() {
           addContentImage(this);
+        });
+        $.each(msg.quotes, function() {
+          addContentQuote(this);
         });
       } else {
         addContentInfo("No content found.");

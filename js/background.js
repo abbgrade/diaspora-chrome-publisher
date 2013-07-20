@@ -88,8 +88,62 @@ function getOpt(opt){
   return (window.localStorage != null && window.localStorage.getItem(opt) != null) ? window.localStorage.getItem(opt) : "true";
 }
 
-/**
- * Create a context menu which will only show up for images.
+function openShareDialog(info, tab, onDialogLoaded) {
+  chrome.windows.create({
+      url: chrome.extension.getURL('share.html'),
+      type: 'popup',
+      width: 560, height: 420
+    },
+    function(window) {
+      console.log("share.html opened");
+  
+      var pageTitle = tab.title;
+      var pageUrl = info.pageUrl;
+      var imagesJson = new Array(0);
+      var videosJson = new Array(0);
+      var quotesJson = new Array(0);
+
+      onDialogLoaded(chrome.extension.connect(), pageTitle, pageUrl, imagesJson, videosJson, quotesJson);
+  });
+}
+
+/*
+ * Create a context menu, which will only show up for selected text
+ */
+chrome.contextMenus.create({
+  "title" : chrome.i18n.getMessage("extAction"),
+  "type" : "normal",
+  "contexts": ["selection"],
+  "onclick": function(info, tab) {
+    console.log("text context clicked.");
+    openShareDialog(info, tab, function(port, pageTitle, pageUrl, imagesJson, videosJson, quotesJson){
+
+      // add data
+      quotesJson.push({
+        pageSrc: pageUrl,
+        pageTitle: pageTitle,
+        text: info.selectionText
+      });
+
+      // send data
+      console.log("send getPageDataResponse");
+      port.postMessage({
+        type : "getPageDataResponse",
+        title: pageTitle,
+        url: pageUrl, 
+        images: imagesJson,
+        videos: videosJson,
+        quotes: quotesJson
+      });
+      var error = chrome.extension.lastError;
+      if (error)
+        alert('error: ' + chrome.extension.lastError);
+    });
+  }
+});
+
+/*
+ * Create a context menu, which will only show up for images.
  */
 chrome.contextMenus.create({
   "title" : chrome.i18n.getMessage("extAction"),
@@ -97,41 +151,30 @@ chrome.contextMenus.create({
   "contexts" : ["image"],
   "onclick" : function(info, tab) {
     console.log("image context clicked.");
+    openShareDialog(info, tab, function(port, pageTitle, pageUrl, imagesJson, videosJson, quotesJson){
 
-    chrome.windows.create({
-        url: chrome.extension.getURL('share.html'),
-        type: 'popup',
-        width: 560, height: 420
-      },
-      function(window) {
-        console.log("share.html opened");
+      // add data
+      imagesJson.push({
+        pageSrc: pageUrl,
+        imgSrc: info.srcUrl,
+        width: 100,
+        height: 100,
+        title: pageTitle
+      });
 
-        var port = chrome.extension.connect();
-
-        var pageTitle = tab.title;
-        var pageUrl = info.pageUrl;
-        var imagesJson = new Array(0);
-        var videosJson = new Array(0);
-
-        // add data
-        imagesJson.push({
-          pageSrc: pageUrl,
-          imgSrc: info.srcUrl,
-          width: 100,
-          height: 100,
-          title: pageTitle
-        });
-
-        // send data
-        console.log("send getPageDataResponse");
-        port.postMessage({
-          type : "getPageDataResponse",
-          title: pageTitle,
-          url: pageUrl, 
-          images: imagesJson,
-          videos: videosJson
-        });
-        alert(chrome.extension.lastError);
+      // send data
+      console.log("send getPageDataResponse");
+      port.postMessage({
+        type : "getPageDataResponse",
+        title: pageTitle,
+        url: pageUrl, 
+        images: imagesJson,
+        videos: videosJson,
+        quotes: quotesJson
+      });
+      var error = chrome.extension.lastError;
+      if (error)
+        alert('error: ' + chrome.extension.lastError);
     });
   }
 });
