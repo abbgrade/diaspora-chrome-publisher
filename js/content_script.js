@@ -66,13 +66,17 @@ port.onMessage.addListener(function(msg) {
       });
     }
 
+    // get quotes
+    var quotesJson = new Array(0);
+
     // send data
     port.postMessage({
       type : "getPageDataResponse",
       title: document.title,
       url: document.URL, 
       images: imagesJson,
-      videos: videosJson
+      videos: videosJson,
+      quotes: quotesJson
     });
   }
 });

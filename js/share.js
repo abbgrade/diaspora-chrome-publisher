@@ -133,12 +133,18 @@ function main() {
   });
 
   // parse content
+  /* dont know why, but this was necessary
   var prefix = "chrome-extension://";
   if (window.document.URL.substring(0, prefix.length) === prefix) {
     // internal pages deliver data by themselves!
+    alert(window.document.URL);
+    console.log("skip execution of content_script.js")
   } else {
+    console.log("execute content_script.js")
     chrome.tabs.executeScript(null, {file: "js/content_script.js"});
   }
+  */
+  chrome.tabs.executeScript(null, {file: "js/content_script.js"});
 }
 
 function addContentItem(inner) {
@@ -277,6 +283,7 @@ chrome.extension.onConnect.addListener(function(port) {
   // the tab as a result of the user pressing the browser action.
   port.onMessage.addListener(function(msg) {
     if (msg.type == "sendText") {
+      console.log("received sendText");
       var max_length = 1024;
       var max_url_length = 25;
       if (msg.selection.length > max_length)
@@ -307,9 +314,7 @@ chrome.extension.onConnect.addListener(function(port) {
       console.log("received getPageDataResponse");
 
       if((msg.images.length + msg.videos.length + msg.quotes.length) > 0) {
-        console.log(msg.images.length + " images");
-        console.log(msg.videos.length + " videos");
-        console.log(msg.quotes.length + " quotes");
+        console.log(msg.images.length + " images, " + msg.videos.length + " videos, " + msg.quotes.length + " quotes");
         $.each(msg.videos, function() {
           addContentVideo(this);
         });
@@ -320,6 +325,7 @@ chrome.extension.onConnect.addListener(function(port) {
           addContentQuote(this);
         });
       } else {
+        console.log("No content found.");
         addContentInfo("No content found.");
       }
     } else {
