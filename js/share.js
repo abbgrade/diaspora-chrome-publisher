@@ -60,6 +60,13 @@ function getPostSrc() {
     } else {
       // without title
     }
+  } else if (item.hasClass("link")) {
+    // with link
+    var pageSrc = item.attr('data-page-src');
+    var title = item.attr('data-page-title');
+
+    // with title
+    src = src + "\n\n" + "[ **"+title+"** ]("+pageSrc+")"
   } else {
     console.log("invalid content to share");
     // without image or video
@@ -100,7 +107,7 @@ function main() {
     var podUrl = getPod();
     var mdSrc = getPostSrc();
     var action_url = podUrl + "/bookmarklet?title=" + encodeURIComponent(mdSrc);
-    if (!window.open(action_url+'&v=1&noui=1&jump=doclose','diasporav1','location=yes,links=no,toolbar=no,width=590,height=250'))
+    if (!window.open(action_url+'&v=1&noui=1&jump=doclose','diasporav1','location=yes,links=no,toolbar=no,width=590,height=200'))
       location.href = action_url+'jump=yes';
     window.close();
   });
@@ -133,18 +140,19 @@ function main() {
   });
 
   // parse content
-  /* dont know why, but this was necessary
+  /* dont know why, but this was necessary 
   var prefix = "chrome-extension://";
-  if (window.document.URL.substring(0, prefix.length) === prefix) {
+  if (window.document.URL.substring(0, prefix.length) == prefix) {
     // internal pages deliver data by themselves!
     alert(window.document.URL);
     console.log("skip execution of content_script.js")
   } else {
     console.log("execute content_script.js")
     chrome.tabs.executeScript(null, {file: "js/content_script.js"});
-  }
-  */
+  }*/
+  
   chrome.tabs.executeScript(null, {file: "js/content_script.js"});
+  
 }
 
 function addContentItem(inner) {
@@ -264,6 +272,21 @@ function addContentQuote(quote) {
 
 }
 
+function addContentLink(link) {
+  var inner = $("#contentLinkTemplate").clone();
+  inner.removeAttr("id");
+  inner.removeClass("hide");
+
+  // fill innner
+  inner.find("a").first().html(link.title);
+  inner.find("a").first().attr('href', link.url);
+  inner.attr("data-page-src", link.url);
+  inner.attr("data-page-title", link.title);
+
+  console.log("add link " + link.url);
+  addContentItem(inner);
+}
+
 function addContentInfo(text) {
   var inner = $("#contentInfoTemplate").clone();
   inner.removeAttr("id");
@@ -313,21 +336,17 @@ chrome.extension.onConnect.addListener(function(port) {
     } else if (msg.type == "getPageDataResponse") {
       console.log("received getPageDataResponse");
 
-      if((msg.images.length + msg.videos.length + msg.quotes.length) > 0) {
-        console.log(msg.images.length + " images, " + msg.videos.length + " videos, " + msg.quotes.length + " quotes");
-        $.each(msg.videos, function() {
-          addContentVideo(this);
-        });
-        $.each(msg.images, function() {
-          addContentImage(this);
-        });
-        $.each(msg.quotes, function() {
-          addContentQuote(this);
-        });
-      } else {
-        console.log("No content found.");
-        addContentInfo("No content found.");
-      }
+      console.log(msg.images.length + " images, " + msg.videos.length + " videos, " + msg.quotes.length + " quotes");
+      $.each(msg.videos, function() {
+        addContentVideo(this);
+      });
+      $.each(msg.images, function() {
+        addContentImage(this);
+      });
+      $.each(msg.quotes, function() {
+        addContentQuote(this);
+      });
+      addContentLink({title: msg.title, url: msg.url});
     } else {
       console.log(msg);
     }
